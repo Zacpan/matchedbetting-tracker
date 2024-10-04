@@ -1,0 +1,28 @@
+CREATE DATABASE IF NOT EXISTS MatchedBetting;
+USE MatchedBetting;
+
+-- Create the Offers table
+CREATE TABLE Offers (
+    offer_id INT AUTO_INCREMENT PRIMARY KEY,
+    bookmaker VARCHAR(50) NOT NULL,
+    category ENUM('sports_signup', 'casino_signup', 'sports_reload', 'casino_reload', 'other') NOT NULL,
+    money_in DECIMAL(10, 2) NOT NULL,
+    money_out DECIMAL(10, 2) NOT NULL,
+    status ENUM('sign_up/livechat', 'active', 'complete') NOT NULL,
+    offer_start_date DATETIME NOT NULL,
+    notes VARCHAR(255)
+);
+
+-- Create the Bets table
+CREATE TABLE Bets (
+    bet_id INT AUTO_INCREMENT PRIMARY KEY,
+    offer_id INT,
+    settle_datetime DATETIME NOT NULL,
+    status ENUM('placed', 'completed') NOT NULL,
+    category ENUM('qual_bet', 'free_bet', 'other') NOT NULL,
+    bmwinwinloss FLOAT NOT NULL,
+    mblosewinloss FLOAT NOT NULL,
+    winning_side ENUM('bookmaker', 'exchange') NOT NULL,
+    notes VARCHAR(255),
+    FOREIGN KEY (offer_id) REFERENCES Offers(offer_id) ON DELETE CASCADE
+);
