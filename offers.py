@@ -95,7 +95,7 @@ def open_offers_screen(main_window=None):
                     create_offer(bookmaker, category, float(money_in), float(money_out or 0), status, offer_start_datetime, notes)
                     messagebox.showinfo("Success", "Offer created successfully!")
                     create_offer_window.destroy()
-                    load_offers()  # Refresh after creating
+                    load_offers()
                 except Exception as e:
                     messagebox.showerror("Error", f"Failed to create offer: {e}")
             else:
@@ -161,21 +161,29 @@ def open_offers_screen(main_window=None):
 
         def submit_update():
             bookmaker = bookmaker_entry.get()
-            category = category_entry.get()
+            category = category_combobox.get()
             money_in = money_in_entry.get()
             money_out = money_out_entry.get()
-            status = status_entry.get()
-            offer_start_date = offer_start_date_entry.get()
+            status = status_combobox.get()
+            offer_date = offer_start_date_entry.get_date().strftime('%Y-%m-%d')
+            offer_time = f"{hour_combobox.get()}:{minute_combobox.get()}:00"
+            offer_start_datetime = f"{offer_date} {offer_time}"
             notes = notes_entry.get()
 
-            update_offer(offer_id, status=status, money_out=float(money_out or 0))
-            messagebox.showinfo("Success", "Offer updated successfully!")
-            update_offer_window.destroy()
-            load_offers()  # Refresh after updating
+            if bookmaker and category and money_in and offer_start_datetime:
+                try:
+                    update_offer(offer_id, bookmaker=bookmaker, category=category, money_in=float(money_in), money_out=float(money_out or 0), status=status, offer_start_date=offer_start_datetime, notes=notes)
+                    messagebox.showinfo("Success", "Offer updated successfully!")
+                    update_offer_window.destroy()
+                    load_offers()
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to update offer: {e}")
+            else:
+                messagebox.showerror("Error", "Please fill all required fields.")
 
         update_offer_window = tk.Toplevel(offers_window)
         update_offer_window.title("Update Offer")
-        update_offer_window.geometry("400x400")
+        update_offer_window.geometry("400x550")
 
         tk.Label(update_offer_window, text="Bookmaker:").pack(pady=5)
         bookmaker_entry = tk.Entry(update_offer_window)
@@ -183,9 +191,9 @@ def open_offers_screen(main_window=None):
         bookmaker_entry.pack(pady=5)
 
         tk.Label(update_offer_window, text="Category:").pack(pady=5)
-        category_entry = tk.Entry(update_offer_window)
-        category_entry.insert(0, selected_offer[2])
-        category_entry.pack(pady=5)
+        category_combobox = ttk.Combobox(update_offer_window, values=["sports_signup", "casino_signup", "sports_reload", "casino_reload", "other"], state="readonly")
+        category_combobox.set(selected_offer[2])
+        category_combobox.pack(pady=5)
 
         tk.Label(update_offer_window, text="Money In:").pack(pady=5)
         money_in_entry = tk.Entry(update_offer_window)
@@ -198,14 +206,29 @@ def open_offers_screen(main_window=None):
         money_out_entry.pack(pady=5)
 
         tk.Label(update_offer_window, text="Status:").pack(pady=5)
-        status_entry = tk.Entry(update_offer_window)
-        status_entry.insert(0, selected_offer[5])
-        status_entry.pack(pady=5)
+        status_combobox = ttk.Combobox(update_offer_window, values=["sign_up/livechat", "active", "complete"], state="readonly")
+        status_combobox.set(selected_offer[5])
+        status_combobox.pack(pady=5)
 
         tk.Label(update_offer_window, text="Offer Start Date:").pack(pady=5)
-        offer_start_date_entry = tk.Entry(update_offer_window)
-        offer_start_date_entry.insert(0, selected_offer[6])
+        offer_start_date_entry = DateEntry(update_offer_window, date_pattern='yyyy-mm-dd', state="readonly")
+        offer_start_date_entry.set_date(selected_offer[6].split()[0])
         offer_start_date_entry.pack(pady=5)
+
+        tk.Label(update_offer_window, text="Offer Start Time:").pack(pady=5)
+        time_frame = tk.Frame(update_offer_window)
+        time_frame.pack(pady=5)
+
+        offer_start_time = selected_offer[6].split()[1].split(':')
+        hour_combobox = ttk.Combobox(time_frame, values=[f"{i:02d}" for i in range(24)], width=3, state="readonly")
+        hour_combobox.set(offer_start_time[0])
+        hour_combobox.pack(side="left", padx=5)
+
+        tk.Label(time_frame, text=":").pack(side="left")
+
+        minute_combobox = ttk.Combobox(time_frame, values=[f"{i:02d}" for i in range(60)], width=3, state="readonly")
+        minute_combobox.set(offer_start_time[1])
+        minute_combobox.pack(side="left", padx=5)
 
         tk.Label(update_offer_window, text="Notes:").pack(pady=5)
         notes_entry = tk.Entry(update_offer_window)
@@ -226,7 +249,7 @@ def open_offers_screen(main_window=None):
         if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this offer?"):
             delete_offer(offer_id)
             messagebox.showinfo("Success", "Offer deleted successfully!")
-            load_offers()  # Refresh after deleting
+            load_offers()
 
     def open_bets_for_offer():
         selected_item = tree.selection()
@@ -235,7 +258,7 @@ def open_offers_screen(main_window=None):
             return
 
         offer_id = tree.item(selected_item)['values'][0]
-        open_bets_screen(offer_id)  # Open the bets screen for the selected offer
+        open_bets_screen(offer_id)
 
     def go_back():
         offers_window.destroy()

@@ -114,7 +114,7 @@ def view_bets_for_offer(offer_id):
 
 
 # Function to update an existing offer
-def update_offer(offer_id, status=None, money_out=None, notes=None):
+def update_offer(offer_id, bookmaker=None, category=None, money_in=None, money_out=None, status=None, offer_start_date=None, notes=None):
     connection = create_connection()
     if connection:
         try:
@@ -122,12 +122,24 @@ def update_offer(offer_id, status=None, money_out=None, notes=None):
             updates = []
             params = []
             
-            if status:
-                updates.append("status = %s")
-                params.append(status)
+            if bookmaker:
+                updates.append("bookmaker = %s")
+                params.append(bookmaker)
+            if category:
+                updates.append("category = %s")
+                params.append(category)
+            if money_in is not None:
+                updates.append("money_in = %s")
+                params.append(money_in)
             if money_out is not None:
                 updates.append("money_out = %s")
                 params.append(money_out)
+            if status:
+                updates.append("status = %s")
+                params.append(status)
+            if offer_start_date:
+                updates.append("offer_start_date = %s")
+                params.append(offer_start_date)
             if notes:
                 updates.append("notes = %s")
                 params.append(notes)
@@ -135,18 +147,28 @@ def update_offer(offer_id, status=None, money_out=None, notes=None):
             if updates:
                 query = f"UPDATE Offers SET {', '.join(updates)} WHERE offer_id = %s"
                 params.append(offer_id)
+                
+                # Expanded Debugging: Print the full query and parameter list
+                print(f"Executing Query: {query} with params {params}")
+                
                 cursor.execute(query, tuple(params))
                 connection.commit()
-                
-                print(f"Offer ID {offer_id} updated successfully.")
+
+                affected_rows = cursor.rowcount
+                if affected_rows > 0:
+                    print(f"Offer ID {offer_id} updated successfully.")
+                else:
+                    print(f"Offer ID {offer_id} not updated. No changes detected or issue with the query.")
             else:
                 print("No updates provided for the offer.")
         
         except Error as e:
-            print(f"Error: {e}")
+            print(f"Error during update: {e}")
+        
         finally:
             cursor.close()
             connection.close()
+
 
 # Function to update an existing bet
 def update_bet(bet_id, status=None, bmwinwinloss=None, mblosewinloss=None, notes=None):

@@ -47,6 +47,7 @@ def create_main_screen():
     offers_button.bind("<Enter>", lambda e: on_enter(e, offers_button))
     offers_button.bind("<Leave>", lambda e: on_leave(e, offers_button))
     offers_button.pack(pady=10)
+    
 
     stats_button = tk.Button(button_frame, text="Stats", width=20, height=2, bg="#0f0f0f", fg="#f0f0f0", font=button_font, bd=0, relief="flat", command=open_stats)
     stats_button.bind("<Enter>", lambda e: on_enter(e, stats_button))
