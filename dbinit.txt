@@ -1,3 +1,5 @@
+//Use this text to initilise database on MYSQL WORKBENCH
+
 CREATE DATABASE IF NOT EXISTS MatchedBetting;
 USE MatchedBetting;
 
